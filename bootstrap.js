@@ -59,6 +59,7 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
  * }
  */
 
+const MIN_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour
 const PREF_BRANCH = "extensions.sigma.";
 const SIGMA_JSON = "https://sigma.mozillalabs.com/sigma.json";
 const UPDATE_FREQUENCY = 24 * 60 * 60 * 1000; // 1 day
@@ -117,6 +118,13 @@ function checkForUpdates() {
   if (Svc.IO.offline)
     return;
 
+  // Avoid multiple checks that are close to each other
+  let now = Date.now();
+  let lastCheck = checkForUpdates.lastCheck;
+  if (lastCheck != null && now - lastCheck < MIN_CHECK_INTERVAL)
+    return;
+  checkForUpdates.lastCheck = now;
+
   // Fetch and unpack the json data
   let res = new Resource(SIGMA_JSON);
   res.authenticator = new NoOpAuthenticator();
@@ -157,6 +165,34 @@ function checkForUpdates() {
   });
 }
 
+/**
+ * Watch for add-on manager updating add-ons to also check for updates
+ */
+function observeAddonUpdates() {
+  Cu.import("resource://gre/modules/AddonUpdateChecker.jsm");
+  let orig = AddonUpdateChecker.checkForUpdates;
+  AddonUpdateChecker.checkForUpdates = function() {
+    // Don't block the original call and check for updates after it finishes
+    Utils.delay(function() checkForUpdates());
+    return orig.apply(this, arguments);
+  };
+  unloaders.push(function() AddonUpdateChecker.checkForUpdates = orig);
+}
+
+/**
+ * Create a repeating timer that checks for updates and stops on unload
+ */
+function preparePeriodicUpdates() {
+  function checker() {
+    checkForUpdates();
+
+    // Schedule the next check only if there weren't any failures
+    Utils.delay(checker, UPDATE_FREQUENCY, checker, "timer");
+  }
+  checker();
+  unloaders.push(function() checker.timer.clear());
+}
+
 function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon) {
   Cu.import("resource://services-sync/auth.js");
   Cu.import("resource://services-sync/ext/Preferences.js");
@@ -166,15 +202,8 @@ function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon
   if (reason == ADDON_ENABLE)
     enableDisabled();
 
-  // Create a repeating timer that checks for updates and stops on unload
-  function checker() {
-    checkForUpdates();
-
-    // Schedule the next check only if there weren't any failures
-    Utils.delay(checker, UPDATE_FREQUENCY, checker, "timer");
-  }
-  checker();
-  unloaders.push(function() checker.timer.clear());
+  observeAddonUpdates();
+  preparePeriodicUpdates();
 });
 
 function shutdown(data, reason) {
