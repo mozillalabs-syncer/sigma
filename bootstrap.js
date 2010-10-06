@@ -70,6 +70,7 @@ let unloaders = [];
 // Keep an array of install ids from the manifest
 let installIds = [];
 
+// Get a prefs reference to get and set preferences
 XPCOMUtils.defineLazyGetter(this, "prefs", function() {
   return new Preferences(PREF_BRANCH);
 });
@@ -193,6 +194,9 @@ function preparePeriodicUpdates() {
   unloaders.push(function() checker.timer.clear());
 }
 
+/**
+ * Handle the add-on being activated on install/enable
+ */
 function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon) {
   Cu.import("resource://services-sync/auth.js");
   Cu.import("resource://services-sync/ext/Preferences.js");
@@ -206,6 +210,9 @@ function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon
   preparePeriodicUpdates();
 });
 
+/**
+ * Handle the add-on being deactivated on uninstall/disable
+ */
 function shutdown(data, reason) {
   if (reason == ADDON_DISABLE)
     disableInstalled();
