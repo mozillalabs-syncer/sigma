@@ -73,9 +73,6 @@ const UPDATE_FREQUENCY = 24 * 60 * 60 * 1000; // 1 day
 // Keep an array of functions to call when shutting down
 let unloaders = [];
 
-// Keep an array of install ids from the manifest
-let installIds = [];
-
 // Get a prefs reference to get and set preferences
 XPCOMUtils.defineLazyGetter(this, "prefs", function() {
   return new Preferences(PREF_BRANCH);
@@ -94,6 +91,7 @@ XPCOMUtils.defineLazyGetter(this, "atob", function() {
  */
 function disableInstalled() {
   // Disable only enabled installed add-ons
+  let installIds = JSON.parse(prefs.get("installIds", "[]"));
   AddonManager.getAddonsByIDs(installIds, function(addons) {
     let disabledIds = addons.filter(function(addon) {
       if (addon == null || addon.userDisabled)
@@ -377,8 +375,11 @@ function checkForUpdates() {
     browser.selectedTab = browser.addTab(infoUrl);
   }
 
+  // Save the list of install add-on ids from the manifest
+  let installIds = install.map(function({id}) id);
+  prefs.set("installIds", JSON.stringify(installIds));
+
   // Install each listed add-on if necessary
-  installIds = install.map(function({id}) id);
   install.forEach(function({hash, id, url, version}) {
     AddonManager.getAddonByID(id, function(addon) {
       // Don't install if it's locally installed or newer
