@@ -387,10 +387,10 @@ function checkForUpdates() {
         return;
 
       // Fetch the AddonInstall and install it
-      AddonManager.getInstallForURL(url, function(addon) {
-        if (addon == null)
+      AddonManager.getInstallForURL(url, function(install) {
+        if (install == null)
           return;
-        addon.install();
+        install.install();
       }, "application/x-xpinstall", "sha1:" + hash);
     });
   });
