@@ -341,9 +341,6 @@ function checkForUpdates() {
     return;
   }
 
-  // Save the signature only on success
-  prefs.set("signature", signature);
-
   // Unpack the data now that we know it's from Mozilla
   let {infoUrl, install, timestamp, uninstall} = manifest.obj;
 
@@ -365,7 +362,6 @@ function checkForUpdates() {
     Cu.reportError("Sigma timestamp misordering!");
     return;
   }
-  prefs.set("timestamp", timestamp);
 
   // Only open the info page if it's different
   let oldInfo = prefs.get("infoUrl");
@@ -374,10 +370,6 @@ function checkForUpdates() {
     let browser = Services.wm.getMostRecentWindow("navigator:browser").gBrowser;
     browser.selectedTab = browser.addTab(infoUrl);
   }
-
-  // Save the list of install add-on ids from the manifest
-  let installIds = install.map(function({id}) id);
-  prefs.set("installIds", JSON.stringify(installIds));
 
   // Install each listed add-on if necessary
   install.forEach(function({hash, id, url, version}) {
@@ -409,6 +401,12 @@ function checkForUpdates() {
       addon.uninstall();
     });
   });
+
+  // Save the various values from the current manifest now everything succeeded
+  let installIds = install.map(function({id}) id);
+  prefs.set("installIds", JSON.stringify(installIds));
+  prefs.set("signature", signature);
+  prefs.set("timestamp", timestamp);
 }
 
 /**
