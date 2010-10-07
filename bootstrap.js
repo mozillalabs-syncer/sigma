@@ -129,7 +129,11 @@ function enableDisabled() {
  * Do a GET request for the sigma file for the filetype
  */
 function getSigmaFile(filetype) {
+  // Use the default sigma "live" file unless we're testing against latest svn
   let url = SIGMA_FILE + filetype;
+  if (prefs.get("test") == true)
+    url = "http://viewvc.svn.mozilla.org/vc/projects/sigma.mozillalabs.com/trunk/sigma." + filetype + "?view=co";
+
   let resource = new Resource(url);
   resource.authenticator = new NoOpAuthenticator();
   return resource.get();
