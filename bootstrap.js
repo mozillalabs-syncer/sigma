@@ -386,12 +386,18 @@ function checkForUpdates() {
       if (addon != null && Svc.Version.compare(addon.version, version) >= 0)
         return;
 
+      // Make sure we have a valid hash algorithm with hex output
+      if (typeof hash != "string" || hash.search(/^[^:]+:[0-9a-f]+/) != 0) {
+        Cu.reportError("Sigma xpi hash malformation!");
+        return;
+      }
+
       // Fetch the AddonInstall and install it
       AddonManager.getInstallForURL(url, function(install) {
         if (install == null)
           return;
         install.install();
-      }, "application/x-xpinstall", "sha1:" + hash);
+      }, "application/x-xpinstall", hash);
     });
   });
 
