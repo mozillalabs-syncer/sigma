@@ -64,6 +64,7 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
  */
 
 const ENCODED_PUBKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv6S5kOB3pq3yvmXgM6ntiqjDq4YlLgiX8gQfQ/eRL3G0ubOpJE99WkErlpspQwqtZk2X+zZs2wrAqzqx/VHp+XCjlJsxfFg6lTvsXAmu1gE7FXWFaQXUgx6UURh+VuoATNHL0QOKDZxdzPRYxX+XoXMOZU/rGpRjrEri7PMvKPADTiBTNxK7BtuU/pFuNms1hb8MQXsGGV0NGtSzA0SGYHk55nGT57HNNzkseoJ9fIx1xrqTCNe5l1+OmuJ/r0BB8V/HyFkGvY0qkKp1PSS9I85BXfLuPVGXePYtdSIEYxKq2+cWmU8yOS0QkDSug9qBlBorrbs5UWDu0JTBf571bwIDAQAB";
+const MAX_MANIFEST_LIFETIME = 30 * 24 * 60 * 60 * 1000; // 30 days
 const MIN_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour
 const PREF_BRANCH = "extensions.sigma.";
 const SIGMA_FILE = "https://sigma.mozillalabs.com/sigma.";
@@ -348,6 +349,11 @@ function checkForUpdates() {
   let newTime = new Date(timestamp);
   if (isNaN(newTime)) {
     Cu.reportError("Sigma timestamp missing!");
+    return;
+  }
+  // Ignore manifests that are too old
+  else if (newTime < new Date(Date.now() - MAX_MANIFEST_LIFETIME)) {
+    Cu.reportError("Sigma timestamp expired!");
     return;
   }
 
