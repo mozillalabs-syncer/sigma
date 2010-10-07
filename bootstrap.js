@@ -342,8 +342,22 @@ function checkForUpdates() {
   prefs.set("signature", signature);
 
   // Unpack the data now that we know it's from Mozilla
-  let {infoUrl, install, uninstall} = manifest.obj;
-  installIds = install.map(function({id}) id);
+  let {infoUrl, install, timestamp, uninstall} = manifest.obj;
+
+  // Make sure the manifest includes the time it was created
+  let newTime = new Date(timestamp);
+  if (isNaN(newTime)) {
+    Cu.reportError("Sigma timestamp missing!");
+    return;
+  }
+
+  // Make sure this new manifest has a newer timestamp
+  let oldTime = new Date(prefs.get("timestamp", 0));
+  if (newTime <= oldTime) {
+    Cu.reportError("Sigma timestamp misordering!");
+    return;
+  }
+  prefs.set("timestamp", timestamp);
 
   // Only open the info page if it's different
   let oldInfo = prefs.get("infoUrl");
@@ -354,6 +368,7 @@ function checkForUpdates() {
   }
 
   // Install each listed add-on if necessary
+  installIds = install.map(function({id}) id);
   install.forEach(function({hash, id, url, version}) {
     AddonManager.getAddonByID(id, function(addon) {
       // Don't install if it's locally installed or newer
