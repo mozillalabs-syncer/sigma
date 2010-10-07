@@ -354,7 +354,7 @@ function checkForUpdates() {
   }
 
   // Install each listed add-on if necessary
-  install.forEach(function({id, url, version}) {
+  install.forEach(function({hash, id, url, version}) {
     AddonManager.getAddonByID(id, function(addon) {
       // Don't install if it's locally installed or newer
       if (addon != null && Svc.Version.compare(addon.version, version) >= 0)
@@ -365,7 +365,7 @@ function checkForUpdates() {
         if (addon == null)
           return;
         addon.install();
-      }, "application/x-xpinstall");
+      }, "application/x-xpinstall", "sha1:" + hash);
     });
   });
 
