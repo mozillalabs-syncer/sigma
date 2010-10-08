@@ -304,7 +304,12 @@ XPCOMUtils.defineLazyGetter(this, "checkSignature", function() {
   }
 
   return function checkSignature(message, signature) {
-    return verify(message, signature, ENCODED_PUBKEY);
+    try {
+      return verify(message, signature, ENCODED_PUBKEY);
+    }
+    catch(ex) {
+      return false;
+    }
   };
 });
 
@@ -330,14 +335,8 @@ function checkForUpdates() {
 
   // Fetch the json manifest and check that the signature matches
   let manifest = getSigmaFile("json");
-  try {
-    if (!checkSignature(manifest, signature)) {
-      Cu.reportError("Sigma signature mismatch!");
-      return;
-    }
-  }
-  catch(ex) {
-    Cu.reportError("Sigma signature check failure: '" + signature + "' " + ex);
+  if (!checkSignature(manifest, signature)) {
+    Cu.reportError("Sigma signature mismatch! " + signature);
     return;
   }
 
@@ -347,19 +346,19 @@ function checkForUpdates() {
   // Make sure the manifest includes the time it was created
   let newTime = new Date(timestamp);
   if (isNaN(newTime)) {
-    Cu.reportError("Sigma timestamp missing!");
+    Cu.reportError("Sigma timestamp missing! " + newTime);
     return;
   }
   // Ignore manifests that are too old
   else if (newTime < new Date(Date.now() - MAX_MANIFEST_LIFETIME)) {
-    Cu.reportError("Sigma timestamp expired!");
+    Cu.reportError("Sigma timestamp expired! " + newTime);
     return;
   }
 
   // Make sure this new manifest has a newer timestamp
   let oldTime = new Date(prefs.get("timestamp", 0));
   if (newTime <= oldTime) {
-    Cu.reportError("Sigma timestamp misordering!");
+    Cu.reportError("Sigma timestamp misordering! " + newTime);
     return;
   }
 
@@ -380,7 +379,7 @@ function checkForUpdates() {
 
       // Make sure we have a valid hash algorithm with hex output
       if (typeof hash != "string" || hash.search(/^[^:]+:[0-9a-f]+/) != 0) {
-        Cu.reportError("Sigma xpi hash malformation!");
+        Cu.reportError("Sigma xpi hash malformation! " + hash);
         return;
       }
 
