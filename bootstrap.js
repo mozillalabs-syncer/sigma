@@ -44,23 +44,10 @@ Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 /**
- * Sample json manifest:
+ * Visit the following wiki page to view and update documentation about the
+ * manifest structure, local state, add-on behavior, etc.
  *
- * {
- *   "infoUrl": "https://site/info",
- *
- *   "install": [
- *     {
- *       "id": "addon1",
- *       "url": "https://site/addon1.xpi",
- *       "version": 1
- *     }
- *   ],
- *
- *   "uninstall": [
- *     "addon2"
- *   ]
- * }
+ * https://wiki.mozilla.org/Labs/Sigma
  */
 
 const ENCODED_PUBKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv6S5kOB3pq3yvmXgM6ntiqjDq4YlLgiX8gQfQ/eRL3G0ubOpJE99WkErlpspQwqtZk2X+zZs2wrAqzqx/VHp+XCjlJsxfFg6lTvsXAmu1gE7FXWFaQXUgx6UURh+VuoATNHL0QOKDZxdzPRYxX+XoXMOZU/rGpRjrEri7PMvKPADTiBTNxK7BtuU/pFuNms1hb8MQXsGGV0NGtSzA0SGYHk55nGT57HNNzkseoJ9fIx1xrqTCNe5l1+OmuJ/r0BB8V/HyFkGvY0qkKp1PSS9I85BXfLuPVGXePYtdSIEYxKq2+cWmU8yOS0QkDSug9qBlBorrbs5UWDu0JTBf571bwIDAQAB";
