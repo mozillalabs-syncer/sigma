@@ -7,7 +7,7 @@
     <homepageURL>https://mozillalabs.com/</homepageURL>
     <iconURL>https://mozillalabs.com/wp-content/themes/labs_project/img/default-header.png</iconURL>
     <id>sigma@labs.mozilla</id>
-    <name>Mozilla Labs: Labs Pack</name>
+    <name>Mozilla Labs: Lab Kit</name>
     <version>1</version>
 
     <bootstrap>true</bootstrap>
