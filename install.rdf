@@ -5,7 +5,7 @@
     <creator>Mozilla Labs</creator>
     <description>Automatically receive new features and experiments from Mozilla Labs</description>
     <homepageURL>https://mozillalabs.com/</homepageURL>
-    <iconURL>https://mozillalabs.com/wp-content/themes/labs_project/img/default-header.png</iconURL>
+    <iconURL>http://mozillalabs.com/wp-content/themes/labs_project/img/labkit-header.png</iconURL>
     <id>sigma@labs.mozilla</id>
     <name>Mozilla Labs: Lab Kit</name>
     <version>1</version>
