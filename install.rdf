@@ -4,7 +4,7 @@
   <r:Description about="urn:mozilla:install-manifest">
     <creator>Mozilla Labs</creator>
     <description>Automatically receive new features and experiments from Mozilla Labs</description>
-    <homepageURL>https://mozillalabs.com/</homepageURL>
+    <homepageURL>https://mozillalabs.com/labkit</homepageURL>
     <iconURL>http://mozillalabs.com/wp-content/themes/labs_project/img/labkit-header.png</iconURL>
     <id>sigma@labs.mozilla</id>
     <name>Mozilla Labs: Lab Kit</name>
