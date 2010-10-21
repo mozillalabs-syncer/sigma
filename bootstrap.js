@@ -69,8 +69,10 @@ XPCOMUtils.defineLazyGetter(this, "prefs", function() {
  * Convert base64 encoded strings into binary data
  */
 XPCOMUtils.defineLazyGetter(this, "atob", function() {
-  return Cc["@mozilla.org/appshell/appShellService;1"].
+  // XXX Bug 606305 just returning atob triggers NS_ERROR_XPC_BAD_OP_ON_WN_PROTO
+  let atob = Cc["@mozilla.org/appshell/appShellService;1"].
     getService(Ci.nsIAppShellService).hiddenDOMWindow.atob;
+  return function() atob.apply(null, arguments);
 });
 
 /**
