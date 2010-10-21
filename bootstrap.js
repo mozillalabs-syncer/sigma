@@ -295,6 +295,7 @@ XPCOMUtils.defineLazyGetter(this, "checkSignature", function() {
       return verify(message, signature, ENCODED_PUBKEY);
     }
     catch(ex) {
+      Cu.reportError("Sigma verify exception! " + ex);
       return false;
     }
   };
