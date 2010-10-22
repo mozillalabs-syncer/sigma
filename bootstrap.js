@@ -137,33 +137,18 @@ XPCOMUtils.defineLazyGetter(this, "checkSignature", function() {
   Cc["@mozilla.org/psm;1"].getService(Ci.nsISupports);
 
   // Open the NSS library.
-  let nssfile = Services.dirsvc.get("GreD", Ci.nsILocalFile);
-  let os = Services.appinfo.OS;
-  switch (os) {
-    case "WINNT":
-    case "WINMO":
-    case "WINCE":
-      nssfile.append("nss3.dll");
-      break;
-    case "Darwin":
-      nssfile.append("libnss3.dylib");
-      break;
-    case "Linux":
-    case "SunOS":
-    case "WebOS": // Palm Pre
-      nssfile.append("libnss3.so");
-      break;
-    case "Android":
-      // Android uses a $GREDIR/lib/ subdir.
-      nssfile.append("lib");
-      nssfile.append("libnss3.so");
-      break;
-    default:
-      throw Components.Exception("unsupported platform: " + os, Cr.NS_ERROR_UNEXPECTED);
+  let path = ctypes.libraryName("nss3");
+  let nsslib;
+  try {
+    // XXX really want to be able to pass specific dlopen flags here.
+    nsslib = ctypes.open(path);
   }
-
-  // XXX really want to be able to pass specific dlopen flags here.
-  let nsslib = ctypes.open(nssfile.path);
+  catch(ex) {
+    // If opening the library without a full path fails, try with a full path.
+    let file = Services.dirsvc.get("GreD", Ci.nsILocalFile);
+    file.append(path);
+    nsslib = ctypes.open(file.path);
+  }
 
   let nss = {};
   let nss_t = {};
