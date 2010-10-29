@@ -51,6 +51,7 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
  */
 
 const ENCODED_PUBKEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6TzjQo+b53ncapurHi9gdG9aaeg/jms3bX9HHNHHAgtVodNhQsjMBybA73NNPKlvI9jF19eKY/1/lL4Dkd166m85fxp8OBPYABy0jfNPPjwlAksuBgLdEbmTO+zr2vvHAG6DM9wrpOJWuNi+4MrOWuby47wNG3xC/0OJJKjtAwrb7kkfSb02GkP+LsMUXOJOzKTRadebsoRcRXzFeTDoUITACUAtYzsZPSgCLRrKc831xxoFGXIRNlFAdb+WYtNm+fO3ysjgufTjHlNsZ4Z8RYPuGFJwWsVb/Cgi1ejy7A8KEAmiLSE+0c5fziqRgBGNisLnvlsByY2NlFc5ry23SQIDAQAB";
+const LABKIT_LOGO = "http://mozillalabs.com/wp-content/themes/labs_project/img/labkit-header.png";
 const MAX_MANIFEST_LIFETIME = 30 * 24 * 60 * 60 * 1000; // 30 days
 const MIN_CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour
 const PREF_BRANCH = "extensions.sigma.";
@@ -341,8 +342,26 @@ function checkForUpdates() {
   let oldInfo = prefs.get("infoUrl");
   if (infoUrl != oldInfo) {
     prefs.set("infoUrl", infoUrl);
-    let browser = Services.wm.getMostRecentWindow("navigator:browser").gBrowser;
-    browser.selectedTab = browser.addTab(infoUrl);
+
+    // Only open a tab when it's clicked
+    function clickCallback(subject, topic, data) {
+      // The callback is called twice (on click and finish)
+      if (topic != "alertclickcallback")
+        return;
+
+      // Open and switch to the tab
+      let window = Services.wm.getMostRecentWindow("navigator:browser");
+      let browser = window.gBrowser;
+      browser.selectedTab = browser.addTab(infoUrl);
+    }
+
+    // Show the notification on platforms that support it
+    let as = Cc["@mozilla.org/alerts-service;1"].getService(Ci.nsIAlertsService);
+    try {
+      as.showAlertNotification(LABKIT_LOGO, "Your Lab Kit Contents",
+        "Experiments are now up to date!", true, null, clickCallback);
+    }
+    catch(ex) {}
   }
 
   // Install each listed add-on if necessary
