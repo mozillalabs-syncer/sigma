@@ -455,3 +455,17 @@ function shutdown(data, reason) {
 
   unloaders.forEach(function(unload) unload());
 }
+
+/**
+ * Handle the add-on being installed
+ */
+function install(data, reason) {
+  // Clear out any old preferences/state when installed
+  Cu.import("resource://services-sync/ext/Preferences.js");
+  prefs.resetBranch("");
+}
+
+/**
+ * Handle the add-on being uninstalled
+ */
+function uninstall(data, reason) {}
