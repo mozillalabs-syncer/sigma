@@ -460,6 +460,10 @@ function shutdown(data, reason) {
  * Handle the add-on being installed
  */
 function install(data, reason) {
+  // Don't bother resetting prefs when upgrading
+  if (reason == ADDON_UPGRADE)
+    return;
+
   // Clear out any old preferences/state when installed
   Cu.import("resource://services-sync/ext/Preferences.js");
   prefs.resetBranch("");
